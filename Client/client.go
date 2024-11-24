@@ -10,17 +10,20 @@ import (
 )
 
 func main() {
+	var seconds string
 	if len(os.Args) != 3 && len(os.Args) != 2 {
 		fmt.Println("Uso: ./client <server_ip> <port> <seconds>")
 		return
 	} else if len(os.Args) == 2{
-		seconds := os.Args[5]
+		seconds = os.Args[5]
+	} else {
+		seconds = "5"
 	}
 
 	//parametros de ejecucion
 	ip := os.Args[1]
 	port := os.Args[2]
-	seconds := os.Args[3]
+
 
 	//numero de intentos de login
 	var attempts int
@@ -64,9 +67,11 @@ func main() {
 		if err != nil{
 			fmt.Printf("Error leyendo respuesta del servidor: %v", err)
 		}
-		if response = "SUCCESSFUL_LOGIN"{
+		if response == "SUCCESSFUL_LOGIN" {
+			//enviar intervalo de tiempo
+			networkWriter.WriteString(seconds + "\n")
 			//ceder acceso a ejecucion de comandos
-			//helpers.ClientTCP(&socket)
+			helpers.ClientTCP(&conn)
 		}
 	}
 }
