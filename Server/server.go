@@ -52,13 +52,14 @@ func main() {
 			//ceder el control a la funcion de conexion
 			messenger.WriteString("LOGIN_OK\n")
 			messenger.Flush()
-
-			helpers.WriteLog(fmt.Sprint("Cliente", credentials[0] , "autenticado en: ", conn.RemoteAddr().Network()))
+			mensaje := "Cliente " + credentials[0] + " autenticado en: " + conn.RemoteAddr().String()
+			helpers.WriteLog(mensaje)
 			//recibir intervalo de tiempo
-			
+			fmt.Println(mensaje)
 			intervalo, _ := buffer.ReadString('\n')
 			seconds, _ := strconv.Atoi(strings.Trim(intervalo, "\n"))
 			//ceder control a la funcion de ejecucion de comandos
+			fmt.Print("Intervalo de tiempo: ", seconds, " segundos\n")
 			go helpers.ServerTCP(&conn, time.Duration(seconds))
 
 		}

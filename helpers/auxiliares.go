@@ -123,7 +123,7 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
 		messenger.WriteString(commandOutput + "\n")
 		messenger.Flush()
 
-		fmt.Printf("\nEnviado al cliente %s: %s", (*socket).RemoteAddr().String(), commandOutput)
+		fmt.Printf("\nEnviado al cliente %s: %s\n", (*socket).RemoteAddr().String(), commandOutput)
 	}
 }
 
