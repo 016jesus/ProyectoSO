@@ -7,6 +7,7 @@ import (
 	"os"
 	"proyectoso/helpers"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -64,10 +65,11 @@ func main() {
 		}
 
 		response, err := networkReader.ReadString('\n')
+		response = strings.Trim(response, "\n")
 		if err != nil{
 			fmt.Printf("Error leyendo respuesta del servidor: %v", err)
 		}
-		if response == "SUCCESSFUL_LOGIN" {
+		if response == "LOGIN_OK" {
 			//enviar intervalo de tiempo
 			networkWriter.WriteString(seconds + "\n")
 			//ceder acceso a ejecucion de comandos
