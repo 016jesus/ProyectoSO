@@ -7,15 +7,16 @@ import (
 	"os"
 	"proyectoso/helpers"
 	"strconv"
+	"strings"
 )
 
 func main() {
 	var seconds string
-	if len(os.Args) != 3 && len(os.Args) != 2 {
+	if len(os.Args) > 4 && len(os.Args) < 3 {
 		fmt.Println("Uso: ./client <server_ip> <port> <seconds>")
 		return
-	} else if len(os.Args) == 2{
-		seconds = os.Args[5]
+	} else if len(os.Args) == 4{
+		seconds = os.Args[3]
 	} else {
 		seconds = "5"
 	}
@@ -46,14 +47,15 @@ func main() {
 	networkReader := bufio.NewReader(conn)
 	for i := 0; i <= attempts; i++ {
 		if i != 0{
-			fmt.Println("Verifique sus credenciales. Intentos restantes: ", attempts - i)
+			fmt.Println("Verifique sus credenciales. Intentos restantes:", attempts - i)
 		}
 		fmt.Print("Login as: ")
 		username, _ := localReader.ReadString('\n')
-
+		username = strings.Trim(username, "\n")
 		fmt.Print("Password: ")
 		password, _ := localReader.ReadString('\n')
-
+		password = strings.Trim(password, "\n")
+		password = helpers.Encrypt(password)
 		credentials := username + ":" + password
 		
 		networkWriter.WriteString(credentials + "\n")
@@ -64,10 +66,13 @@ func main() {
 		}
 
 		response, err := networkReader.ReadString('\n')
+		response = strings.Trim(response, "\n")
 		if err != nil{
-			fmt.Printf("Error leyendo respuesta del servidor: %v", err)
+			fmt.Printf("Error leyendo respuesta del servidor: %v\n", err)
+			continue
 		}
-		if response == "SUCCESSFUL_LOGIN" {
+		fmt.Print(response)
+		if response == "LOGIN_OK" {
 			//enviar intervalo de tiempo
 			networkWriter.WriteString(seconds + "\n")
 			//ceder acceso a ejecucion de comandos
