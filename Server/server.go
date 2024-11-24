@@ -6,6 +6,9 @@ import (
 	"log"
 	"net"
 	"proyectoso/helpers"
+	"strconv"
+	"strings"
+	"time"
 )
 
 
@@ -46,11 +49,18 @@ func main() {
 		credentials:= helpers.ReceiveCredentials(buffer)
 		messenger := bufio.NewWriter(conn)
 		if(helpers.ValidarLogin(credentials, mapasswd)){
+			
 			//ceder el control a la funcion de conexion
 			messenger.WriteString("SUCCESSFUL_LOGIN\n")
 			messenger.Flush()
+
 			helpers.WriteLog("Cliente "+ credentials[0] + " autenticado en: " + conn.RemoteAddr().Network())
-			go helpers.ServerTCP(&conn)
+			//recibir intervalo de tiempo
+			
+			intervalo, _ := buffer.ReadString('\n')
+			seconds, _ := strconv.Atoi(strings.Trim(intervalo, "\n"))
+			//ceder control a la funcion de ejecucion de comandos
+			go helpers.ServerTCP(&conn, time.Duration(seconds))
 
 		}
 	}
