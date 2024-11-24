@@ -13,9 +13,8 @@ import (
 
 
 func main() {
+
 	mapasswd := helpers.ReadCredentials("/etc/serverOper/users.db")
-
-
 
 	fmt.Println("**************************************")
 	fmt.Println("**** ServerOper - JGD, DAMT, MJMZ ****")
@@ -51,10 +50,10 @@ func main() {
 		if(helpers.ValidarLogin(credentials, mapasswd)){
 			
 			//ceder el control a la funcion de conexion
-			messenger.WriteString("SUCCESSFUL_LOGIN\n")
+			messenger.WriteString("LOGIN_OK\n")
 			messenger.Flush()
 
-			helpers.WriteLog("Cliente "+ credentials[0] + " autenticado en: " + conn.RemoteAddr().Network())
+			helpers.WriteLog(fmt.Sprint("Cliente", credentials[0] , "autenticado en: ", conn.RemoteAddr().Network()))
 			//recibir intervalo de tiempo
 			
 			intervalo, _ := buffer.ReadString('\n')

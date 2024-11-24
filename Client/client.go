@@ -71,8 +71,7 @@ func main() {
 			fmt.Printf("Error leyendo respuesta del servidor: %v\n", err)
 			continue
 		}
-		fmt.Print(response)
-		if response == "LOGIN_OK" {
+		if response == "SUCCESSFUL_LOGIN" {
 			//enviar intervalo de tiempo
 			networkWriter.WriteString(seconds + "\n")
 			//ceder acceso a ejecucion de comandos
