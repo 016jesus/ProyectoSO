@@ -58,8 +58,8 @@ func GetSystemReports(intervalo time.Duration) {
 	
 		// Formateamos la salida
 		if len(fields) >= 8 {
-			us := fields[1]
-			return fmt.Sprintf("CPU en uso: %s", us)
+			us := fields[3] + "%"
+			return fmt.Sprint("en uso:", us, )
 		} else {
 			return "Error: La salida de top no tiene la estructura esperada."
 		}
