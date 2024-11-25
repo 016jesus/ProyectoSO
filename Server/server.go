@@ -59,9 +59,14 @@ func main() {
 			intervalo, _ := buffer.ReadString('\n')
 			seconds, _ := strconv.Atoi(strings.Trim(intervalo, "\n"))
 			//ceder control a la funcion de ejecucion de comandos
-			fmt.Print("Intervalo de tiempo: ", seconds, " segundos\n")
 			go helpers.ServerTCP(&conn, time.Duration(seconds))
 
+		}else{
+			messenger.WriteString("LOGIN_FAIL\n")
+			mensaje := "Cliente " + credentials[0] + " autenticado en: " + conn.RemoteAddr().String()
+			helpers.WriteLog(mensaje)
+			messenger.Flush()
+			conn.Close()
 		}
 	}
 }

@@ -99,12 +99,12 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
 			break
 		}
 
-		if command == "reporte" {
+		if command == "report" {
 			// Leer el último reporte generado
 			control.RLock()
 			reporte := reporteActual
 			control.RUnlock()
-
+			fmt.Print("Enviando reporte al cliente...", reporte)
 			_, _ = messenger.WriteString(reporte + "\n")
 			messenger.Flush()
 			continue
