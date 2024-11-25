@@ -137,6 +137,5 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
 func getSystemSymbol() string {
 	usr, _ := user.Current()
 	host, _ := os.Hostname()
-	path, _ := os.Getwd()
-	return fmt.Sprintf("%s@%s:%s$ ", usr.Username, host, path)
+	return fmt.Sprintf("%s@%s:~$ ", usr.Username, host)
 }
