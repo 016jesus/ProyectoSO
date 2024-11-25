@@ -42,19 +42,18 @@ func main() {
 	}
 
 
-	localReader := bufio.NewReader(os.Stdin)
 	networkWriter := bufio.NewWriter(conn)
 	networkReader := bufio.NewReader(conn)
+	var username, password string
 	for i := 0; i <= attempts; i++ {
 		if i != 0{
 			fmt.Println("Verifique sus credenciales. Intentos restantes:", attempts - i)
 		}
 		fmt.Print("Login as: ")
-		username, _ := localReader.ReadString('\n')
-		username = strings.Trim(username, "\n")
+		fmt.Scan(&username)
 		fmt.Print("Password: ")
-		password, _ := localReader.ReadString('\n')
-		password = strings.Trim(password, "\n")
+		fmt.Scan(&password)
+		bufio.NewReader(os.Stdin).ReadString('\n')
 		password = helpers.Encrypt(password)
 		credentials := username + ":" + password
 		

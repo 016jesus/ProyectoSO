@@ -36,17 +36,19 @@ func ClientTCP(socket *net.Conn) {
 	for {
 		symbol, _ := remoteReader.ReadString('\n')
 		fmt.Print(strings.TrimSpace(symbol) + " ")
-
+		
 		localReader := bufio.NewReader(os.Stdin)
 		comando, _ := localReader.ReadString('\n')
-		comando = strings.Trim(comando, "\n")
-
+		comando = strings.TrimSpace(comando)
 		if comando == "bye" {
 			messenger.WriteString("bye\n")
-			messenger.Flush()
+			err := messenger.Flush()
+			if  err != nil {
+				fmt.Printf("Error cerrando conexión %v", err)
+			}
 			fmt.Println("Cerrando conexión...")
-			break
-		}
+			return
+		} else{
 		// Enviar comando al servidor
 		messenger.WriteString(comando + "\n")
 		messenger.Flush()
@@ -54,7 +56,8 @@ func ClientTCP(socket *net.Conn) {
 		// obtener la respuesta del servidor y mostrar en consola
 		response = getOutput(remoteReader)
 		fmt.Println(response.String())
-	}
+		}
+}
 
 }
 
