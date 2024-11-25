@@ -15,7 +15,7 @@ func ReceiveCredentials(buffer *bufio.Reader) []string {
 		WriteLog("Error leyendo la línea: " + err.Error())
 		log.Fatalf("Error leyendo la línea: %v", err)
 	}
-
+	
 	credentials := strings.SplitN(line, ":", 2)
 	if len(credentials) != 2 {
 		WriteLog("Formato de credenciales inválido")
