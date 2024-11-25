@@ -39,17 +39,23 @@ func main() {
 	fmt.Println("Servidor escuchando en ", socket.Addr().String())
 	helpers.WriteLog("Servidor abierto en " + socket.Addr().String())
 	for{
+		fmt.Print("Esperando conexion...\n")
 		conn , err := socket.Accept()
 		if err != nil {
 			helpers.WriteLog(err.Error())
 			log.Fatal(err)
 		}
+			fmt.Println("Conexion establecida desde: ", conn.RemoteAddr().String())
 			
 			buffer := bufio.NewReader(conn)
-			credentials:= helpers.ReceiveCredentials(buffer)
+			
 			messenger := bufio.NewWriter(conn)
 			messenger.WriteString(attempts + "\n")
-			messenger.Flush()
+			if messenger.Flush() != nil {
+				log.Fatal("Error enviando intentos")
+			}
+			credentials:= helpers.ReceiveCredentials(buffer)
+		
 			if(helpers.ValidarLogin(credentials, mapasswd)){
 				
 				//ceder el control a la funcion de conexion
