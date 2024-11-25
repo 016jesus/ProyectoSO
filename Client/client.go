@@ -39,7 +39,11 @@ func main() {
 
 	networkWriter := bufio.NewWriter(conn)
 	networkReader := bufio.NewReader(conn)
-	attemps, _ := networkReader.ReadString('\n')
+	attemps, err := networkReader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Error leyendo intentos de login:", err)
+		return
+	}
 	attempts, _ = strconv.Atoi(strings.Trim(attemps, "\n"))
 	var username, password string
 	for i := 0; i <= attempts; i++ {
