@@ -71,7 +71,6 @@ func main() {
 			fmt.Printf("Error leyendo respuesta del servidor: %v\n", err)
 			continue
 		}
-		fmt.Print("Respuesta del servidor: ", response + "\n")
 		if response == "LOGIN_OK" {
 			break
 		}
