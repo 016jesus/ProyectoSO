@@ -19,8 +19,8 @@ func main() {
 	fmt.Println("**************************************")
 	fmt.Println("**** ServerOper - JGD, DAMT, MJMZ ****")
 	fmt.Println("**************************************")
-
-
+	attempts, _:= helpers.ReadConfig("/etc/serverOper/serverOper.conf", "attempts")
+	
 
 	//preparar conexion
 	direccionTCP, err := net.ResolveTCPAddr("tcp4", ":2024")
@@ -44,29 +44,32 @@ func main() {
 			helpers.WriteLog(err.Error())
 			log.Fatal(err)
 		}
-		buffer := bufio.NewReader(conn)
-		credentials:= helpers.ReceiveCredentials(buffer)
-		messenger := bufio.NewWriter(conn)
-		if(helpers.ValidarLogin(credentials, mapasswd)){
 			
-			//ceder el control a la funcion de conexion
-			messenger.WriteString("LOGIN_OK\n")
+			buffer := bufio.NewReader(conn)
+			credentials:= helpers.ReceiveCredentials(buffer)
+			messenger := bufio.NewWriter(conn)
+			messenger.WriteString(attempts + "\n")
 			messenger.Flush()
-			mensaje := "Cliente " + credentials[0] + " autenticado en: " + conn.RemoteAddr().String()
-			helpers.WriteLog(mensaje)
-			//recibir intervalo de tiempo
-			fmt.Println(mensaje)
-			intervalo, _ := buffer.ReadString('\n')
-			seconds, _ := strconv.Atoi(strings.Trim(intervalo, "\n"))
-			//ceder control a la funcion de ejecucion de comandos
-			go helpers.ServerTCP(&conn, time.Duration(seconds))
+			if(helpers.ValidarLogin(credentials, mapasswd)){
+				
+				//ceder el control a la funcion de conexion
+				messenger.WriteString("LOGIN_OK\n")
+				messenger.Flush()
+				mensaje := "Cliente " + credentials[0] + " autenticado en: " + conn.RemoteAddr().String()
+				helpers.WriteLog(mensaje)
+				//recibir intervalo de tiempo
+				fmt.Println(mensaje)
+				intervalo, _ := buffer.ReadString('\n')
+				seconds, _ := strconv.Atoi(strings.Trim(intervalo, "\n"))
+				//ceder control a la funcion de ejecucion de comandos
+				go helpers.ServerTCP(&conn, time.Duration(seconds))
 
-		}else{
-			messenger.WriteString("LOGIN_FAIL\n")
-			mensaje := "Cliente " + credentials[0] + " autenticado en: " + conn.RemoteAddr().String()
-			helpers.WriteLog(mensaje)
-			messenger.Flush()
-			conn.Close()
-		}
+			}else{
+				messenger.WriteString("LOGIN_FAIL\n")
+				mensaje := "Error autenticando desde: " + conn.RemoteAddr().String()
+				helpers.WriteLog(mensaje)
+				messenger.Flush()
+			}
+		
 	}
 }
