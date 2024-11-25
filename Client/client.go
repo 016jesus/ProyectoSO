@@ -28,12 +28,7 @@ func main() {
 
 	//numero de intentos de login
 	var attempts int
-	output, err := helpers.ReadConfig("/etc/serverOper/serverOper.conf", "attempts")
-	if err != nil{
-		attempts = 3
-	}else{
-		attempts, _ = strconv.Atoi(output)
-	}
+
 
 	conn, err := net.Dial("tcp4", ip + ":" + port)
 	if err != nil {
@@ -44,6 +39,8 @@ func main() {
 
 	networkWriter := bufio.NewWriter(conn)
 	networkReader := bufio.NewReader(conn)
+	attemps, _ := networkReader.ReadString('\n')
+	attempts, _ = strconv.Atoi(strings.Trim(attemps, "\n"))
 	var username, password string
 	for i := 0; i <= attempts; i++ {
 		if i != 0{
