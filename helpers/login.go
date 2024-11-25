@@ -8,12 +8,11 @@ import (
 //Comprueba las credenciales de usuario
 func ValidarLogin(array []string, credb map[string]string) bool {
 	user := array[0]
-	if passwd, ok := credb[user]; ok {
-		if passwd == array[1] {
+	passwd, ok := credb[user]
+	if ok && passwd == array[1] {
 			return true
-		}
 	}
-	return true
+	return false
 }
 
 //retorna la passwd hasheada y en hexadecimal

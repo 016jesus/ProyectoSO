@@ -16,16 +16,11 @@ import (
 func GetSystemReports(intervalo time.Duration) {
 		for {
 	
-			usoDisco := usoDisk()
-			usoMemoria := usoRAM()
-			usoCPU := usoCPU()
+			disk := usoDisk()
+			ram := usoRAM()
+			cpu := usoCPU()
 	
-			reporte := fmt.Sprintf(
-				"Reporte de sistema:\nDisco:\n %s\nMemoria:\n %s\nCPU:\n %s\n",
-				usoDisco, usoMemoria, usoCPU,
-			)
-	
-			// Actualizar el reporte compartido
+			reporte := fmt.Sprintf("Reporte de sistema:\nDisco:\n%sMemoria:\n%sCPU:%s\n",disk, ram, cpu)
 			control.Lock()
 			reporteActual = reporte
 			control.Unlock()
@@ -35,46 +30,40 @@ func GetSystemReports(intervalo time.Duration) {
 		}
 	}
 
-func usoCPU() string {
-	cmdTop := exec.Command("top", "-b", "-n", "1")	
+	func usoCPU() string {
+		cmdTop := exec.Command("top", "-b", "-n", "1")
 	
-	var outTop bytes.Buffer
-	cmdTop.Stdout = &outTop
-	err := cmdTop.Run()
-	if err != nil {
-		return fmt.Sprint("Error ejecutando top:", err)
+		var outTop bytes.Buffer
+		cmdTop.Stdout = &outTop
+		err := cmdTop.Run()
+		if err != nil {
+			return fmt.Sprint("Error ejecutando top:", err)
+		}
+	
+		// Filtramos la salida con `grep`
+		cmdGrep := exec.Command("grep", "%Cpu")
+	
+		// Pasamos la salida de `top` al comando `grep`
+		cmdGrep.Stdin = &outTop
+		var outGrep bytes.Buffer
+		cmdGrep.Stdout = &outGrep
+		err = cmdGrep.Run()
+		if err != nil {
+			return fmt.Sprint("Error ejecutando grep:", err)
+		}
+	
+		// Usamos strings para dividir y manipular la salida
+		output := outGrep.String()
+		fields := strings.Fields(output)
+	
+		// Formateamos la salida
+		if len(fields) >= 8 {
+			us := fields[1]
+			return fmt.Sprintf("CPU en uso: %s", us)
+		} else {
+			return "Error: La salida de top no tiene la estructura esperada."
+		}
 	}
-
-	// Ahora filtramos la salida con `grep`
-	cmdGrep := exec.Command("grep", "Cpu(s)")
-
-	// Pasamos la salida de `top` al comando `grep`
-	cmdGrep.Stdin = &outTop
-	var outGrep bytes.Buffer
-	cmdGrep.Stdout = &outGrep
-	err = cmdGrep.Run()
-	if err != nil {
-		return fmt.Sprint("Error ejecutando grep:", err)
-	}
-
-	// Filtramos la salida con `awk`
-	// Usamos strings para dividir y manipular la salida
-	output := outGrep.String()
-	fields := strings.Fields(output)
-
-	// Formateamos la salida
-	if len(fields) >= 8 {
-		us := fields[1]
-		sy := fields[3]
-		ni := fields[5]
-		id := fields[7]
-
-		// Imprimimos el resultado con el formato que queremos
-		return fmt.Sprintf("\nprocesos de usuario: %s \nsystem: %s \nno used: %s \nid: %s\n", us, sy, ni, id)
-	} else {
-		return "Error: La salida de top no tiene la estructura esperada."
-	}
-}
 
 
 func usoDisk() string {
