@@ -42,9 +42,10 @@ func ClientTCP(socket *net.Conn) {
 		comando = strings.Trim(comando, "\n")
 
 		if comando == "bye" {
-			messenger.WriteString(comando + "\n")
+			messenger.WriteString("bye\n")
+			messenger.Flush()
 			fmt.Println("Cerrando conexión...")
-			return
+			break
 		}
 		// Enviar comando al servidor
 		messenger.WriteString(comando + "\n")

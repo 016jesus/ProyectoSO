@@ -40,7 +40,7 @@ func main() {
 		fmt.Println("Error conectando al servidor:", err)
 		return
 	}
-	defer conn.Close()
+
 
 	localReader := bufio.NewReader(os.Stdin)
 	networkWriter := bufio.NewWriter(conn)
@@ -73,11 +73,12 @@ func main() {
 		}
 		fmt.Print("Respuesta del servidor: ", response + "\n")
 		if response == "LOGIN_OK" {
-			//enviar intervalo de tiempo
-			networkWriter.WriteString(seconds + "\n")
-			networkWriter.Flush()
-			//ceder acceso a ejecucion de comandos
-			helpers.ClientTCP(&conn)
+			break
 		}
 	}
+		//enviar intervalo de tiempo
+		networkWriter.WriteString(seconds + "\n")
+		networkWriter.Flush()
+		//ceder acceso a ejecucion de comandos
+		helpers.ClientTCP(&conn)
 }
