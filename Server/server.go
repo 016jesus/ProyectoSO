@@ -38,8 +38,10 @@ func main() {
 	defer socket.Close()
 	fmt.Println("Servidor escuchando en ", socket.Addr().String())
 	helpers.WriteLog("Servidor abierto en " + socket.Addr().String())
+
+	//esperar conexiones
 	for{
-		fmt.Print("Esperando conexion...\n")
+		fmt.Println("Esperando conexion...")
 		conn , err := socket.Accept()
 		if err != nil {
 			helpers.WriteLog(err.Error())
@@ -54,6 +56,8 @@ func main() {
 			if messenger.Flush() != nil {
 				log.Fatal("Error enviando intentos")
 			}
+			limit, _ := strconv.Atoi(attempts)
+			for i := 0; i <= limit; i++ {
 			credentials:= helpers.ReceiveCredentials(buffer)
 		
 			if(helpers.ValidarLogin(credentials, mapasswd)){
@@ -73,9 +77,11 @@ func main() {
 			}else{
 				messenger.WriteString("LOGIN_FAIL\n")
 				mensaje := "Error autenticando desde: " + conn.RemoteAddr().String()
+				fmt.Println(mensaje)
 				helpers.WriteLog(mensaje)
 				messenger.Flush()
 			}
+		}
 		
 	}
 }

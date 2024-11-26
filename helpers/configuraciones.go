@@ -59,7 +59,7 @@ func ReadConfig(ruta string, config string) (string, error){
         }
 		credentials := strings.Split(line, "=")
 		if credentials[0] == config {
-			return credentials[0], nil
+			return credentials[1], nil
 		} else {
 			continue	
 		}
