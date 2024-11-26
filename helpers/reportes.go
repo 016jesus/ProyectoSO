@@ -98,7 +98,7 @@ func usoRAM() string {
 }
 
 
-func getOutput(remoteReader *bufio.Reader) strings.Builder {
+func getOutput(remoteReader *bufio.Reader) (strings.Builder, error) {
 	var output strings.Builder
 	for {
 		linea, err := remoteReader.ReadString('\n')
@@ -107,12 +107,12 @@ func getOutput(remoteReader *bufio.Reader) strings.Builder {
 				break
 			}
 			output.WriteString(fmt.Sprintf("Error leyendo la salida remota: %v\n", err))
-			break;
+			return output, err
 		}
 		if strings.TrimSpace(linea) == "" {
 			break
 		}
 		output.WriteString(linea)
 	}
-	return output
+	return output, nil
 }

@@ -30,6 +30,7 @@ var control sync.RWMutex
 func ClientTCP(socket *net.Conn) {
     defer (*socket).Close()
     var response strings.Builder
+    var err error
     messenger := bufio.NewWriter(*socket)
     remoteReader := bufio.NewReader(*socket)
 
@@ -59,7 +60,11 @@ func ClientTCP(socket *net.Conn) {
             messenger.Flush()
 
             // obtener la respuesta del servidor y mostrar en consola
-            response = getOutput(remoteReader)
+            response, err = getOutput(remoteReader)
+            if err != nil {
+                fmt.Println(response.String())
+                break;
+            }
             fmt.Println(response.String())
         }
     }
