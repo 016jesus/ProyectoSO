@@ -51,14 +51,17 @@ func main() {
 	}
 	var username, password string
 	var login bool = false
+	buffer := bufio.NewReader(os.Stdin)
 	for i := 0; i < attempts; i++ {
 		if i != 0{
 			fmt.Println("Verifique sus credenciales. Intentos restantes:", attempts - i)
 		}
 		fmt.Print("Login as: ")
-		fmt.Scan(&username)
+		username, _ = buffer.ReadString('\n')
 		fmt.Print("Password: ")
-		fmt.Scan(&password)
+		password, _ = buffer.ReadString('\n')
+		username = strings.TrimSpace(strings.Trim(username, "\n"))
+		password = strings.TrimSpace(strings.Trim(password, "\n"))
 
 		password = helpers.Encrypt(password)
 		credentials := username + ":" + password
