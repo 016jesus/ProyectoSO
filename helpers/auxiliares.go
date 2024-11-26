@@ -16,7 +16,7 @@ import (
 *
 * Variables globales
 *
-*/
+ */
 var reporteActual string
 var control sync.RWMutex
 
@@ -90,23 +90,23 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
         if command == "" {
             continue
         }
-        if command == "bye" {
-            fmt.Println("Shell cerrado por el cliente.")
-            break
-        }
+      
 
         switch command {
+        case "bye":
+            fmt.Println("Shell cerrado por el cliente.")
+            return
         case "report":
             control.RLock()
             reporte := reporteActual
             control.RUnlock()
             messenger.WriteString(reporte + "\n")
         case "report -r":
-            messenger.WriteString(usoRAM() + "\n")
-        case "report -d":
-            messenger.WriteString(usoDisk() + "\n")
+            messenger.WriteString(Ram + "\n")
         case "report -c":
-            messenger.WriteString(usoCPU() + "\n")
+            messenger.WriteString(Cpu + "\n\n")
+        case "report -d":
+            messenger.WriteString(Disk + "\n")
         default:
             output := exec.Command("/bin/sh", "-c", command)
             executedOutput, err := output.CombinedOutput()

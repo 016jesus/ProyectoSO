@@ -64,23 +64,24 @@ func main() {
 		
 		networkWriter.WriteString(credentials + "\n")
 
-		if networkWriter.Flush() != nil {
 		err = networkWriter.Flush()
 		if err != nil {
+			fmt.Println("Error enviando credenciales al servidor:", err)
 			return
 		}
-	
-		response, err := networkReader.ReadString('\n')
-		fmt.Println("Respuesta del servidor:", response)
+		Reader := bufio.NewReader(conn)
+		response, err := Reader.ReadString('\n')
+
+		response = strings.Trim(response, "\n")
 		if err != nil{
 			fmt.Printf("Error leyendo respuesta del servidor: %v\n", err)
 			continue
 		}
+
 		if response == "LOGIN_OK" {
 			login = true
 			break
 		}
-	}
 }
 
 	if login {

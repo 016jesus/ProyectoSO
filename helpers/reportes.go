@@ -11,16 +11,20 @@ import (
 	"time"
 )
 
+var Ram string
+var Cpu string
+var Disk string
+
 
 
 func GetSystemReports(intervalo time.Duration) {
 		for {
 	
-			disk := usoDisk()
-			ram := usoRAM()
-			cpu := usoCPU()
+			Disk = usoDisk()
+			Ram = usoRAM()
+			Cpu = usoCPU()
 	
-			reporte := fmt.Sprintf("Reporte de sistema:\nDisco:\n%sMemoria:\n%sCPU:%s\n",disk, ram, cpu)
+			reporte := fmt.Sprintf("Reporte de sistema:\nDisco:\n%sMemoria:\n%sCPU:%s\n",Disk, Ram, Cpu)
 			control.Lock()
 			reporteActual = reporte
 			control.Unlock()
@@ -31,8 +35,7 @@ func GetSystemReports(intervalo time.Duration) {
 	}
 
 	func usoCPU() string {
-		cmdTop := exec.Command("top", "-b", "-n", "1")
-	
+		cmdTop := exec.Command("/bin/sh", "-c", "top -bn1")	
 		var outTop bytes.Buffer
 		cmdTop.Stdout = &outTop
 		err := cmdTop.Run()
@@ -58,8 +61,10 @@ func GetSystemReports(intervalo time.Duration) {
 	
 		// Formateamos la salida
 		if len(fields) >= 8 {
-			us := fields[3] + "%"
-			return fmt.Sprint("en uso:", us, )
+			us := fields[3]
+			us = strings.Trim(us, "\n")
+			us = strings.Replace(us, ",", ".", 1)
+			return "\nen uso:" + us + "%" + "\n"
 		} else {
 			return "Error: La salida de top no tiene la estructura esperada."
 		}
@@ -67,22 +72,11 @@ func GetSystemReports(intervalo time.Duration) {
 
 
 func usoDisk() string {
+
 	cmd := exec.Command("df", "-h", "/dev/sda5")
-	output, err := cmd.Output()
-	if err != nil {
-		return fmt.Sprintf("Error obteniendo uso de disco: %s", err.Error())
-	}
-
+	output, _ := cmd.Output()
 	lines := strings.Split(string(output), "\n")
-	if len(lines) < 2 {
-		return "Error: La salida de df no tiene la estructura esperada."
-	}
-
 	fields := strings.Fields(lines[1])
-	if len(fields) < 6 {
-		return "Error: La salida de df no tiene la estructura esperada."
-	}
-
 	size, used, avail, usePercent := fields[1], fields[2], fields[3], fields[4]
 
 	return fmt.Sprintf("/dev/sda5:\nTamaño: %s\nUsado: %s\nDisponible: %s\nPorcentaje de uso: %s\n", size, used, avail, usePercent)
@@ -90,20 +84,9 @@ func usoDisk() string {
 
 func usoRAM() string {
 	cmd := exec.Command("free", "-m")
-	output, err := cmd.Output()
-	if err != nil {
-		return fmt.Sprintf("Error obteniendo uso de memoria: %s", err.Error())
-	}
-
+	output, _ := cmd.Output()
 	lines := strings.Split(string(output), "\n")
-	if len(lines) < 2 {
-		return "Error: La salida de free no tiene la estructura esperada."
-	}
-
 	fields := strings.Fields(lines[1])
-	if len(fields) < 7 {
-		return "Error: La salida de free no tiñene la estructura esperada."
-	}
 
 	t, u, f := fields[1], fields[2], fields[3]
 	total, _ := strconv.ParseFloat(t, 64)
