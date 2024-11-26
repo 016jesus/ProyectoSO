@@ -34,7 +34,7 @@ func GetSystemReports(intervalo time.Duration) {
 		}
 	}
 
-	func usoCPU() string {
+func usoCPU() string {
 		cmdTop := exec.Command("/bin/sh", "-c", "top -bn1")	
 		var outTop bytes.Buffer
 		cmdTop.Stdout = &outTop
@@ -64,7 +64,7 @@ func GetSystemReports(intervalo time.Duration) {
 			us := fields[3]
 			us = strings.Trim(us, "\n")
 			us = strings.Replace(us, ",", ".", 1)
-			return "\nen uso:" + us + "%" + "\n"
+			return "en uso:"+ us + "%"
 		} else {
 			return "Error: La salida de top no tiene la estructura esperada."
 		}
