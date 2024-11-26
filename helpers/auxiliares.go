@@ -113,7 +113,7 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
         case "report -r":
             messenger.WriteString(Ram + "\n")
         case "report -c":
-            messenger.WriteString(Cpu + "\n")
+            messenger.WriteString(Cpu + "\n\n")
         case "report -d":
             messenger.WriteString(Disk + "\n")
         default:
