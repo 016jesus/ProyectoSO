@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+    "io"
 )
 
 /*
@@ -28,37 +29,49 @@ var control sync.RWMutex
 *
 */
 func ClientTCP(socket *net.Conn) {
-	defer (*socket).Close()
-	var response strings.Builder
-	messenger := bufio.NewWriter(*socket)
-	remoteReader := bufio.NewReader(*socket)
+    defer (*socket).Close()
+    var response strings.Builder
+    messenger := bufio.NewWriter(*socket)
+    remoteReader := bufio.NewReader(*socket)
 
-	for {
-		symbol, _ := remoteReader.ReadString('\n')
-		fmt.Print(strings.TrimSpace(symbol) + " ")
-		
-		localReader := bufio.NewReader(os.Stdin)
-		comando, _ := localReader.ReadString('\n')
-		comando = strings.TrimSpace(comando)
-		if comando == "bye" {
-			messenger.WriteString("bye\n")
-			err := messenger.Flush()
-			if  err != nil {
-				fmt.Printf("Error cerrando conexión %v", err)
-			}
-			fmt.Println("Cerrando conexión...")
-			return
-		} else{
-		// Enviar comando al servidor
-		messenger.WriteString(comando + "\n")
-		messenger.Flush()
+    scanner := bufio.NewScanner(os.Stdin)
 
-		// obtener la respuesta del servidor y mostrar en consola
-		response = getOutput(remoteReader)
-		fmt.Println(response.String())
-		}
-}
+    for {
+        symbol, err := remoteReader.ReadString('\n')
+        if err != nil {
+            if err == io.EOF {
+                fmt.Println("Conexión cerrada por el servidor.")
+                break
+            }
+            fmt.Printf("Error leyendo del servidor: %v\n", err)
+            break
+        }
+        fmt.Print(strings.TrimSpace(symbol) + " ")
 
+        if !scanner.Scan() {
+            fmt.Println("Error leyendo la entrada del usuario")
+            break
+        }
+        comando := strings.TrimSpace(scanner.Text())
+
+        if comando == "bye" {
+            messenger.WriteString("bye\n")
+            err := messenger.Flush()
+            if err != nil {
+                fmt.Printf("Error cerrando conexión %v", err)
+            }
+            fmt.Println("Cerrando conexión...")
+            return
+        } else {
+            // Enviar comando al servidor
+            messenger.WriteString(comando + "\n")
+            messenger.Flush()
+
+            // obtener la respuesta del servidor y mostrar en consola
+            response = getOutput(remoteReader)
+            fmt.Println(response.String())
+        }
+    }
 }
 
 
@@ -126,5 +139,5 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
 func getSystemSymbol() string {
 	usr, _ := user.Current()
 	host, _ := os.Hostname()
-	return fmt.Sprintf("%s@%s:~$ ", usr.Username, host)
+	return fmt.Sprintf("%s@%s:~$", usr.Username, host)
 }

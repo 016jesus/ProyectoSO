@@ -59,6 +59,7 @@ func main() {
 		fmt.Scan(&username)
 		fmt.Print("Password: ")
 		fmt.Scan(&password)
+
 		password = helpers.Encrypt(password)
 		credentials := username + ":" + password
 		
