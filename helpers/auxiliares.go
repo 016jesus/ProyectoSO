@@ -72,63 +72,52 @@ func ClientTCP(socket *net.Conn) {
 
 
 func ServerTCP(socket *net.Conn, intervalo time.Duration) {
+    messenger := bufio.NewWriter(*socket)
+    remoteReader := bufio.NewReader(*socket)
 
-	messenger := bufio.NewWriter(*socket)
-	remoteReader := bufio.NewReader(*socket)
+    go GetSystemReports(intervalo)
 
-	// Iniciar generación de reportes periódicos
+    for {
+        symbol := getSystemSymbol()
+        messenger.WriteString(symbol + "\n")
+        messenger.Flush()
+        command, err := remoteReader.ReadString('\n')
+        if err != nil {
+            fmt.Println("Error leyendo del socket:", err)
+            break
+        }
+        command = strings.TrimSpace(command)
+        if command == "" {
+            continue
+        }
+        if command == "bye" {
+            fmt.Println("Shell cerrado por el cliente.")
+            break
+        }
 
-	go GetSystemReports(intervalo)
-
-	for {
-		// Leer el símbolo del sistema
-		symbol := getSystemSymbol()
-		messenger.WriteString(symbol + "\n")
-		//enviar simbolo del sistema al cliente y leer comando
-		messenger.Flush()
-		command, err := remoteReader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error leyendo del socket:", err)
-			break
-		}
-		// limpiar el comando
-		command = strings.TrimRight(command, "\r\n")
-		// Verificar si hay comandos
-		if command == "" {
-			continue
-		}
-		if command == "bye" {
-			fmt.Println("Shell cerrado por el cliente.")
-			break
-		}
-
-		if command == "report" {
-			// Leer el último reporte generado
-			control.RLock()
-			reporte := reporteActual
-			control.RUnlock()
-			fmt.Print("Enviando reporte al cliente...", reporte)
-			_, _ = messenger.WriteString(reporte + "\n")
-			messenger.Flush()
-			continue
-		}
-
-		output := exec.Command("/bin/sh", "-c", command)
-		executedOutput, err := output.CombinedOutput()
-		if err != nil {
-			salidaError := fmt.Sprintf("Error ejecutando el comando: %s\n", err.Error())
-			_, _ = messenger.WriteString(salidaError)
-			messenger.Flush()
-			continue
-		}
-
-		// Enviar salida del comando al cliente
-		commandOutput := string(executedOutput)
-		messenger.WriteString(commandOutput + "\n")
-		messenger.Flush()
-
-		fmt.Printf("\nEnviado al cliente %s: %s\n", (*socket).RemoteAddr().String(), commandOutput)
-	}
+        switch command {
+        case "report":
+            control.RLock()
+            reporte := reporteActual
+            control.RUnlock()
+            messenger.WriteString(reporte + "\n")
+        case "report -r":
+            messenger.WriteString(usoRAM() + "\n")
+        case "report -d":
+            messenger.WriteString(usoDisk() + "\n")
+        case "report -c":
+            messenger.WriteString(usoCPU() + "\n")
+        default:
+            output := exec.Command("/bin/sh", "-c", command)
+            executedOutput, err := output.CombinedOutput()
+            if err != nil {
+                messenger.WriteString(fmt.Sprintf("Error ejecutando el comando: %s\n", err.Error()))
+            } else {
+                messenger.WriteString(string(executedOutput) + "\n")
+            }
+        }
+        messenger.Flush()
+    }
 }
 
 
