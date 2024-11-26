@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-    "io"
 )
 
 /*
@@ -37,15 +36,7 @@ func ClientTCP(socket *net.Conn) {
     scanner := bufio.NewScanner(os.Stdin)
 
     for {
-        symbol, err := remoteReader.ReadString('\n')
-        if err != nil {
-            if err == io.EOF {
-                fmt.Println("Conexión cerrada por el servidor.")
-                break
-            }
-            fmt.Printf("Error leyendo del servidor: %v\n", err)
-            break
-        }
+        symbol, _ := remoteReader.ReadString('\n')
         fmt.Print(strings.TrimSpace(symbol) + " ")
 
         if !scanner.Scan() {
