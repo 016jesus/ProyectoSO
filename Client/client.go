@@ -12,7 +12,7 @@ import (
 
 func main() {
 	var seconds string
-	if len(os.Args) > 4 && len(os.Args) < 3 {
+	if len(os.Args) > 4 || len(os.Args) < 3 {
 		fmt.Println("Uso: ./client <server_ip> <port> <seconds>")
 		return
 	} else if len(os.Args) == 4{
@@ -44,9 +44,14 @@ func main() {
 		fmt.Println("Error leyendo intentos de login:", err)
 		return
 	}
-	attempts, _ = strconv.Atoi(strings.Trim(attemps, "\n"))
+	attempts, err = strconv.Atoi(strings.Trim(attemps, "\n"))
+	if err != nil {
+		fmt.Println("Error convirtiendo intentos de login:", err)
+		return
+	}
 	var username, password string
-	for i := 0; i <= attempts; i++ {
+	var login bool = false
+	for i := 0; i < attempts; i++ {
 		if i != 0{
 			fmt.Println("Verifique sus credenciales. Intentos restantes:", attempts - i)
 		}
@@ -54,30 +59,39 @@ func main() {
 		fmt.Scan(&username)
 		fmt.Print("Password: ")
 		fmt.Scan(&password)
-		bufio.NewReader(os.Stdin).ReadString('\n')
 		password = helpers.Encrypt(password)
 		credentials := username + ":" + password
 		
 		networkWriter.WriteString(credentials + "\n")
 
 		if networkWriter.Flush() != nil {
-			fmt.Println("Error sending credentials:", err)
+		err = networkWriter.Flush()
+		if err != nil {
 			return
 		}
-
+	
 		response, err := networkReader.ReadString('\n')
-		response = strings.Trim(response, "\n")
+		fmt.Println("Respuesta del servidor:", response)
 		if err != nil{
 			fmt.Printf("Error leyendo respuesta del servidor: %v\n", err)
 			continue
 		}
 		if response == "LOGIN_OK" {
+			login = true
 			break
 		}
 	}
+}
+
+	if login {
 		//enviar intervalo de tiempo
 		networkWriter.WriteString(seconds + "\n")
 		networkWriter.Flush()
 		//ceder acceso a ejecucion de comandos
 		helpers.ClientTCP(&conn)
+	} else {
+		fmt.Println("Demasiados intentos fallidos. Saliendo...")
+		return
+	}
+
 }
