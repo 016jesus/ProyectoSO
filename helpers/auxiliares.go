@@ -113,14 +113,17 @@ func ServerTCP(socket *net.Conn, intervalo time.Duration) {
         case "report -r":
             messenger.WriteString(Ram + "\n")
         case "report -c":
-            messenger.WriteString(Cpu + "\n\n")
+            messenger.WriteString(Cpu + "\n")
         case "report -d":
             messenger.WriteString(Disk + "\n")
         default:
             output := exec.Command("/bin/sh", "-c", command)
             executedOutput, err := output.CombinedOutput()
             if err != nil {
-                messenger.WriteString(fmt.Sprintf("Error ejecutando el comando: %s\n", err.Error()))
+                fmt.Print(err)
+                messenger.WriteString("Nada apropiado\n")
+            }else if len(executedOutput) == 0 {
+                messenger.WriteString("Nada apropiado\n")
             } else {
                 messenger.WriteString(string(executedOutput) + "\n")
             }

@@ -56,7 +56,6 @@ func main() {
 			}
 			
 			limit, _ := strconv.Atoi(attempts)
-			fmt.Print("Intentos: ", limit)
 			for i := 0; i <= limit; i++ {
 			buffer := bufio.NewReader(conn)
 			credentials:= helpers.ReceiveCredentials(buffer)
@@ -76,14 +75,10 @@ func main() {
 				helpers.WriteLog(mensaje)
 				// recibir intervalo de tiempo
 				fmt.Println(mensaje)
-				intervalo, err := buffer.ReadString('\n')
-				if err != nil {
-					log.Fatal("Error leyendo intervalo de tiempo:", err)
-				}
-				seconds, err = strconv.Atoi(strings.Trim(intervalo, "\n"))
-				if err != nil {
-					log.Fatal("Error convirtiendo intervalo de tiempo:", err)
-				}
+				intervalo, _ := buffer.ReadString('\n')
+			
+				seconds, _ = strconv.Atoi(strings.Trim(intervalo, "\n"))
+			
 				// ceder control a la funcion de ejecucion de comandos
 				break
 				
